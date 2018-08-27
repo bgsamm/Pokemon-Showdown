@@ -162,8 +162,8 @@ let BattleMovedex = {
 				if (target.hurtBy.length == 0) {
 					target.hurtBy.push({source: source, move: move.id, damage: damage});
 				} else {
-					target.hurtBy[0].move = move.id;
-					target.hurtBy[0].damage = damage;
+					target.hurtBy[target.hurtBy.length - 1].move = move.id;
+					target.hurtBy[target.hurtBy.length - 1].damage = damage;
 				}
 				return 0;
 			},
