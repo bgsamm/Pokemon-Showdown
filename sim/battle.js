@@ -1544,7 +1544,15 @@ class Battle extends Dex.ModdedDex {
 
 				// If it was an illusion, it's not any more
 				if (pokemon.hurtBy.length > 0 && this.gen >= 7) pokemon.knownType = true;
-				pokemon.hurtBy = [];
+				
+				for (let i = pokemon.hurtBy.length; i >= 0; i--) {
+					let attack = pokemon.hurtBy[i];
+					if (attack.source.isActive) {
+						attack.thisTurn = false;
+					} else {
+						pokemon.hurtBy.slice(pokemon.hurtBy.indexof(attack), 1);
+					}
+				}
 
 				if (this.gen >= 7) {
 					// In Gen 7, the real type of every Pokemon is visible to all players via the bottom screen while making choices
