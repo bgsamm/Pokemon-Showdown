@@ -949,7 +949,7 @@ let BattleMovedex = {
 		basePower: 60,
 		basePowerCallback: function (pokemon, target, move) {
 			let hurtByTarget = pokemon.hurtBy.find(function (x) {
-				return x.source === target && x.damage > 0;
+				return x.source === target && x.damage > 0 && x.thisTurn;
 			});
 			if (hurtByTarget) {
 				this.debug('Boosted for getting hit by ' + hurtByTarget.move);
@@ -13392,7 +13392,7 @@ let BattleMovedex = {
 		basePower: 60,
 		basePowerCallback: function (pokemon, target, move) {
 			let hurtByTarget = pokemon.hurtBy.find(function (x) {
-				return x.source === target && x.damage > 0;
+				return x.source === target && x.damage > 0 && x.thisTurn;
 			});
 			if (hurtByTarget) {
 				this.debug('Boosted for getting hit by ' + hurtByTarget.move);
