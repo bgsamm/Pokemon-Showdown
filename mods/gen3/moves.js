@@ -189,7 +189,7 @@ let BattleMovedex = {
 		damageCallback: function (pokemon) {
 			if (pokemon.hurtBy.length == 0) return false;
 			let lastHurtBy = pokemon.hurtBy[pokemon.hurtBy.length - 1];
-			if (lastHurtBy.move && (this.getCategory(lastHurtBy.move) === 'Physical' || this.getMove(lastHurtBy.move).id === 'hiddenpower')) {
+			if (lastHurtBy.move && lastHurtBy.thisTurn && (this.getCategory(lastHurtBy.move) === 'Physical' || this.getMove(lastHurtBy.move).id === 'hiddenpower')) {
 				// @ts-ignore
 				return 2 * lastHurtBy.damage;
 			}
