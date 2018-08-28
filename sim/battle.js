@@ -1545,7 +1545,7 @@ class Battle extends Dex.ModdedDex {
 				// If it was an illusion, it's not any more
 				if (pokemon.hurtBy.length > 0 && this.gen >= 7) pokemon.knownType = true;
 				
-				for (let i = pokemon.hurtBy.length; i >= 0; i--) {
+				for (let i = pokemon.hurtBy.length - 1; i >= 0; i--) {
 					let attack = pokemon.hurtBy[i];
 					if (attack.source.isActive) {
 						attack.thisTurn = false;
