@@ -146,7 +146,7 @@ let BattleMovedex = {
 		damageCallback: function (pokemon, target) {
 			if (pokemon.hurtBy.length == 0) return false;
 			let lastHurtBy = pokemon.hurtBy[pokemon.hurtBy.length - 1];
-			if (lastHurtBy.move && (this.getCategory(lastHurtBy.move) === 'Physical' || this.getMove(lastHurtBy.move).id === 'hiddenpower') &&
+			if (lastHurtBy.move && && lastHurtBy.thisTurn && (this.getCategory(lastHurtBy.move) === 'Physical' || this.getMove(lastHurtBy.move).id === 'hiddenpower') &&
 				(!target.lastMove || target.lastMove.id !== 'sleeptalk')) {
 				return 2 * lastHurtBy.damage;
 			}
@@ -497,7 +497,7 @@ let BattleMovedex = {
 		damageCallback: function (pokemon, target) {
 			if (pokemon.hurtBy.length == 0) return false;
 			let lastHurtBy = pokemon.hurtBy[pokemon.hurtBy.length - 1];
-			if (lastHurtBy.move && this.getCategory(lastHurtBy.move) === 'Special' &&
+			if (lastHurtBy.move && lastHurtBy.thisTurn && this.getCategory(lastHurtBy.move) === 'Special' &&
 				this.getMove(lastHurtBy.move).id !== 'hiddenpower' && (!target.lastMove || target.lastMove.id !== 'sleeptalk')) {
 				return 2 * lastHurtBy.damage;
 			}
