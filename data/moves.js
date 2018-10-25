@@ -4389,17 +4389,20 @@ let BattleMovedex = {
 		priority: 0,
 		flags: {protect: 1, reflectable: 1, mirror: 1, authentic: 1},
 		volatileStatus: 'encore',
+		onTry: function (pokemon, target) {
+			let noEncore = ['assist', 'copycat', 'encore', 'mefirst', 'metronome', 'mimic', 'mirrormove', 'naturepower', 'sketch', 'sleeptalk', 'struggle', 'transform'];
+			let moveIndex = target.lastMove ? target.moves.indexOf(target.lastMove.id) : -1;
+			if (!target.lastMove || target.lastMove.isZ || noEncore.includes(target.lastMove.id) || !target.moveSlots[moveIndex] || target.moveSlots[moveIndex].pp <= 0) {
+				// it failed
+				this.attrLastMove('[still]');
+				this.add('-fail', target);
+				return null;
+			}
+		},
 		effect: {
 			duration: 3,
 			noCopy: true, // doesn't get copied by Z-Baton Pass
 			onStart: function (target) {
-				let noEncore = ['assist', 'copycat', 'encore', 'mefirst', 'metronome', 'mimic', 'mirrormove', 'naturepower', 'sketch', 'sleeptalk', 'struggle', 'transform'];
-				let moveIndex = target.lastMove ? target.moves.indexOf(target.lastMove.id) : -1;
-				if (!target.lastMove || target.lastMove.isZ || noEncore.includes(target.lastMove.id) || !target.moveSlots[moveIndex] || target.moveSlots[moveIndex].pp <= 0) {
-					// it failed
-					delete target.volatiles['encore'];
-					return false;
-				}
 				this.effectData.move = target.lastMove.id;
 				this.add('-start', target, 'Encore');
 				if (!this.willMove(target)) {

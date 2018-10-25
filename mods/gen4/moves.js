@@ -518,14 +518,6 @@ let BattleMovedex = {
 				return this.random(4, 9);
 			},
 			onStart: function (target) {
-				let noEncore = ['encore', 'mimic', 'mirrormove', 'sketch', 'struggle', 'transform'];
-				let moveIndex = target.lastMove ? target.moves.indexOf(target.lastMove.id) : -1;
-				if (!target.lastMove || (target.moveThisTurnResult !== undefined && !target.moveThisTurn) || noEncore.includes(target.lastMove.id) || !target.moveSlots[moveIndex] || target.moveSlots[moveIndex].pp <= 0) {
-					// it failed
-					this.add('-fail', target);
-					delete target.volatiles['encore'];
-					return;
-				}
 				this.effectData.move = target.lastMove.id;
 				this.add('-start', target, 'Encore');
 				if (!this.willMove(target)) {
