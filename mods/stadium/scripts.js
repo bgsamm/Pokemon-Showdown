@@ -93,8 +93,9 @@ let BattleScripts = {
 
 		this.setActiveMove(move, pokemon, target);
 
-		if (pokemon.moveThisTurn || !this.runEvent('BeforeMove', pokemon, target, move)) {
-			this.debug('' + pokemon.id + ' move interrupted; movedThisTurn: ' + pokemon.moveThisTurn);
+		let lastMove = pokemon.getLastMove();
+		if ((lastMove && lastMove.thisTurn) || !this.runEvent('BeforeMove', pokemon, target, move)) {
+			this.debug('' + pokemon.id + ' move interrupted; movedThisTurn: ' + lastMove);
 			this.clearActiveMove(true);
 			// This is only run for sleep
 			this.runEvent('AfterMoveSelf', pokemon, target, move);

@@ -22,14 +22,6 @@ let BattleScripts = {
 
 		this.setActiveMove(move, pokemon, target);
 
-		/* if (pokemon.moveThisTurn) {
-			// THIS IS PURELY A SANITY CHECK
-			// DO NOT TAKE ADVANTAGE OF THIS TO PREVENT A POKEMON FROM MOVING;
-			// USE this.cancelMove INSTEAD
-			this.debug('' + pokemon.id + ' INCONSISTENT STATE, ALREADY MOVED: ' + pokemon.moveThisTurn);
-			this.clearActiveMove(true);
-			return;
-		} */
 		let willTryMove = this.runEvent('BeforeMove', pokemon, target, move);
 		if (!willTryMove) {
 			this.runEvent('MoveAborted', pokemon, target, move);
@@ -37,13 +29,13 @@ let BattleScripts = {
 			// The event 'BeforeMove' could have returned false or null
 			// false indicates that this counts as a move failing for the purpose of calculating Stomping Tantrum's base power
 			// null indicates the opposite, as the Pokemon didn't have an option to choose anything
-			pokemon.moveThisTurnResult = willTryMove;
+			move.result = willTryMove;
 			return;
 		}
 		if (move.beforeMoveCallback) {
 			if (move.beforeMoveCallback.call(this, pokemon, target, move)) {
 				this.clearActiveMove(true);
-				pokemon.moveThisTurnResult = false;
+				move.result = false;
 				return;
 			}
 		}
@@ -58,7 +50,7 @@ let BattleScripts = {
 					let gameConsole = [null, 'Game Boy', 'Game Boy', 'Game Boy Advance', 'DS', 'DS'][this.gen] || '3DS';
 					this.add('-hint', "This is not a bug, this is really how it works on the " + gameConsole + "; try it yourself if you don't believe us.");
 					this.clearActiveMove(true);
-					pokemon.moveThisTurnResult = false;
+					move.result = false;
 					return;
 				}
 			} else {

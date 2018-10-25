@@ -1009,7 +1009,7 @@ let BattleMovedex = {
 					return;
 				}
 				this.add('-activate', target, 'move: Protect');
-				source.moveThisTurnResult = true;
+				move.result = true;
 				let lockedmove = source.getVolatile('lockedmove');
 				if (lockedmove) {
 					// Outrage counter is reset
@@ -2557,11 +2557,10 @@ let BattleMovedex = {
 		priority: 0,
 		flags: {authentic: 1},
 		onHit: function (target, source) {
-			if (!target.getLastMove()) {
-				return false;
-			}
+			let lastMove = target.getLastMove();
+			if (!lastMove) return false;
 			let possibleTypes = [];
-			let attackType = target.getLastMove().type;
+			let attackType = lastMove.type;
 			for (let type in this.data.TypeChart) {
 				if (source.hasType(type)) continue;
 				let typeCheck = this.data.TypeChart[type].damageTaken[attackType];
@@ -2845,7 +2844,7 @@ let BattleMovedex = {
 			onTryHit: function (target, source, move) {
 				if (move && (move.target === 'self' || move.category !== 'Status')) return;
 				this.add('-activate', target, 'move: Crafty Shield');
-				source.moveThisTurnResult = true;
+				move.result = true;
 				return null;
 			},
 		},
@@ -3391,7 +3390,8 @@ let BattleMovedex = {
 		flags: {protect: 1, reflectable: 1, mirror: 1, authentic: 1},
 		volatileStatus: 'disable',
 		onTryHit: function (target) {
-			if (!target.getLastMove() || target.getLastMove().isZ) {
+			let lastMove = target.getLastMove();
+			if (!lastMove || lastMove.isZ) {
 				return false;
 			}
 		},
@@ -3402,13 +3402,13 @@ let BattleMovedex = {
 				if (!this.willMove(pokemon)) {
 					this.effectData.duration++;
 				}
-				let pokemonLastMove = pokemon.getLastMove();
-				if (!pokemonLastMove) {
+				let lastMove = pokemon.getLastMove();
+				if (!lastMove) {
 					this.debug('pokemon hasn\'t moved yet');
 					return false;
 				}
 				for (const moveSlot of pokemon.moveSlots) {
-					if (moveSlot.id === pokemonLastMove.id) {
+					if (moveSlot.id === lastMove.id) {
 						if (!moveSlot.pp) {
 							this.debug('Move out of PP');
 							return false;
@@ -3418,7 +3418,7 @@ let BattleMovedex = {
 							} else {
 								this.add('-start', pokemon, 'Disable', moveSlot.move);
 							}
-							this.effectData.move = pokemonLastMove.id;
+							this.effectData.move = lastMove.id;
 							return;
 						}
 					}
@@ -4395,14 +4395,14 @@ let BattleMovedex = {
 			noCopy: true, // doesn't get copied by Z-Baton Pass
 			onStart: function (target) {
 				let noEncore = ['assist', 'copycat', 'encore', 'mefirst', 'metronome', 'mimic', 'mirrormove', 'naturepower', 'sketch', 'sleeptalk', 'struggle', 'transform'];
-				let targetLastMove = target.getLastMove();
-				let moveIndex = targetLastMove ? target.moves.indexOf(targetLastMove.id) : -1;
-				if (!targetLastMove || targetLastMove.isZ || noEncore.includes(targetLastMove.id) || !target.moveSlots[moveIndex] || target.moveSlots[moveIndex].pp <= 0) {
+				let lastMove = target.getLastMove();
+				let moveIndex = lastMove ? target.moves.indexOf(lastMove.id) : -1;
+				if (!lastMove || lastMove.isZ || noEncore.includes(lastMove.id) || !target.moveSlots[moveIndex] || target.moveSlots[moveIndex].pp <= 0) {
 					// it failed
 					delete target.volatiles['encore'];
 					return false;
 				}
-				this.effectData.move = targetLastMove.id;
+				this.effectData.move = lastMove.id;
 				this.add('-start', target, 'Encore');
 				if (!this.willMove(target)) {
 					this.effectData.duration++;
@@ -6057,7 +6057,9 @@ let BattleMovedex = {
 		onBasePowerPriority: 4,
 		onBasePower: function (basePower, pokemon) {
 			for (const active of pokemon.side.active) {
-				if (active && active.moveThisTurn === 'fusionflare') {
+				if (!active) continue;
+				let lastMove = active.getLastMove();
+				if (lastMove && lastMove.thisTurn && lastMove.id === 'fusionflare') {
 					this.debug('double power');
 					return this.chainModify(2);
 				}
@@ -6085,7 +6087,9 @@ let BattleMovedex = {
 		onBasePowerPriority: 4,
 		onBasePower: function (basePower, pokemon) {
 			for (const active of pokemon.side.active) {
-				if (active && active.moveThisTurn === 'fusionbolt') {
+				if (!active) continue;
+				let lastMove = active.getLastMove();
+				if (lastMove && lastMove.thisTurn && lastMove.id === 'fusionbolt') {
 					this.debug('double power');
 					return this.chainModify(2);
 				}
@@ -6727,12 +6731,12 @@ let BattleMovedex = {
 			},
 			onFaint: function (target, source, effect) {
 				if (!source || source.fainted || !effect) return;
-				let sourceLastMove = pokemon.getLastMove();
-				if (effect.effectType === 'Move' && !effect.isFutureMove && sourceLastMove) {
+				let lastMove = source.getLastMove();
+				if (effect.effectType === 'Move' && !effect.isFutureMove && lastMove) {
 					for (const moveSlot of source.moveSlots) {
-						if (moveSlot.id === sourceLastMove.id) {
+						if (moveSlot.id === lastMove.id) {
 							moveSlot.pp = 0;
-							this.add('-activate', source, 'move: Grudge', this.getMove(sourceLastMove.id).name);
+							this.add('-activate', source, 'move: Grudge', this.getMove(lastMove.id).name);
 						}
 					}
 				}
@@ -8216,7 +8220,8 @@ let BattleMovedex = {
 				}
 			},
 			onResidual: function (target) {
-				if (target.getLastMove() && target.getLastMove().id === 'struggle') {
+				let lastMove = target.getLastMove();
+				if (lastMove && lastMove.id === 'struggle') {
 					// don't lock
 					delete target.volatiles['iceball'];
 				}
@@ -8611,17 +8616,17 @@ let BattleMovedex = {
 		priority: 0,
 		flags: {protect: 1, authentic: 1, mystery: 1},
 		onHit: function (target, source) {
-			let targetLastMove = target.getLastMove();
-			if (!targetLastMove) return false;
-			let moveIndex = target.moves.indexOf(targetLastMove.id);
 			let noInstruct = [
 				'assist', 'beakblast', 'bide', 'copycat', 'focuspunch', 'iceball', 'instruct', 'mefirst', 'metronome', 'mimic', 'mirrormove', 'naturepower', 'outrage', 'petaldance', 'rollout', 'shelltrap', 'sketch', 'sleeptalk', 'thrash', 'transform',
 			];
-			if (noInstruct.includes(targetLastMove.id) || targetLastMove.isZ || targetLastMove.flags['charge'] || targetLastMove.flags['recharge'] || target.volatiles['beakblast'] || target.volatiles['focuspunch'] || target.volatiles['shelltrap'] || (target.moveSlots[moveIndex] && target.moveSlots[moveIndex].pp <= 0)) {
+			let lastMove = target.getLastMove();
+			if (!lastMove) return false;
+			let moveIndex = target.moves.indexOf(lastMove.id);
+			if (noInstruct.includes(lastMove.id) || lastMove.isZ || lastMove.flags['charge'] || lastMove.flags['recharge'] || target.volatiles['beakblast'] || target.volatiles['focuspunch'] || target.volatiles['shelltrap'] || (target.moveSlots[moveIndex] && target.moveSlots[moveIndex].pp <= 0)) {
 				return false;
 			}
 			this.add('-singleturn', target, 'move: Instruct', '[of] ' + source);
-			this.runMove(targetLastMove.id, target, target.lastMoveTargetLoc);
+			this.runMove(lastMove.id, target, target.lastMoveTargetLoc);
 		},
 		secondary: null,
 		target: "normal",
@@ -8848,7 +8853,7 @@ let BattleMovedex = {
 					return;
 				}
 				this.add('-activate', target, 'move: Protect');
-				source.moveThisTurnResult = true;
+				move.result = true;
 				let lockedmove = source.getVolatile('lockedmove');
 				if (lockedmove) {
 					// Outrage counter is reset
@@ -9904,7 +9909,7 @@ let BattleMovedex = {
 				}
 				if (move && (move.target === 'self' || move.category === 'Status')) return;
 				this.add('-activate', target, 'move: Mat Block', move.name);
-				source.moveThisTurnResult = true;
+				move.result = true;
 				let lockedmove = source.getVolatile('lockedmove');
 				if (lockedmove) {
 					// Outrage counter is reset
@@ -10310,11 +10315,11 @@ let BattleMovedex = {
 		flags: {protect: 1, authentic: 1, mystery: 1},
 		onHit: function (target, source) {
 			let disallowedMoves = ['chatter', 'mimic', 'sketch', 'struggle', 'transform'];
-			let targetLastMove = target.getLastMove();
-			if (source.transformed || !targetLastMove || disallowedMoves.includes(targetLastMove.id) || source.moves.indexOf(targetLastMove.id) >= 0 || targetLastMove.isZ) return false;
+			let lastMove = target.getLastMove();
+			if (source.transformed || !lastMove || disallowedMoves.includes(lastMove.id) || source.moves.indexOf(lastMove.id) >= 0 || lastMove.isZ) return false;
 			let mimicIndex = source.moves.indexOf('mimic');
 			if (mimicIndex < 0) return false;
-			let move = this.getMove(targetLastMove.id);
+			let move = this.getMove(lastMove.id);
 			source.moveSlots[mimicIndex] = {
 				move: move.name,
 				id: move.id,
@@ -10516,11 +10521,11 @@ let BattleMovedex = {
 		priority: 0,
 		flags: {},
 		onTryHit: function (target, pokemon) {
-			let targetLastMove = target.getLastMove();
-			if (!targetLastMove || !targetLastMove.flags['mirror'] || targetLastMove.isZ) {
+			let lastMove = target.getLastMove();
+			if (!lastMove || !lastMove.flags['mirror'] || lastMove.isZ) {
 				return false;
 			}
-			this.useMove(targetLastMove.id, pokemon, target);
+			this.useMove(lastMove.id, pokemon, target);
 			return null;
 		},
 		secondary: null,
@@ -12334,7 +12339,7 @@ let BattleMovedex = {
 					return;
 				}
 				this.add('-activate', target, 'move: Protect');
-				source.moveThisTurnResult = true;
+				move.result = true;
 				let lockedmove = source.getVolatile('lockedmove');
 				if (lockedmove) {
 					// Outrage counter is reset
@@ -12854,7 +12859,7 @@ let BattleMovedex = {
 					return;
 				}
 				this.add('-activate', target, 'move: Quick Guard');
-				source.moveThisTurnResult = true;
+				move.result = true;
 				let lockedmove = source.getVolatile('lockedmove');
 				if (lockedmove) {
 					// Outrage counter is reset
@@ -13745,7 +13750,8 @@ let BattleMovedex = {
 				}
 			},
 			onResidual: function (target) {
-				if (target.getLastMove() && target.getLastMove().id === 'struggle') {
+				let lastMove = target.getLastMove();
+				if (lastMove && lastMove.id === 'struggle') {
 					// don't lock
 					delete target.volatiles['rollout'];
 				}
@@ -14781,11 +14787,11 @@ let BattleMovedex = {
 		flags: {authentic: 1, mystery: 1},
 		onHit: function (target, source) {
 			let disallowedMoves = ['chatter', 'sketch', 'struggle'];
-			let targetLastMove = target.getLastMove();
-			if (source.transformed || !targetLastMove || disallowedMoves.includes(targetLastMove.id) || source.moves.indexOf(targetLastMove.id) >= 0 || targetLastMove.isZ) return false;
+			let lastMove = target.getLastMove();
+			if (source.transformed || !lastMove || disallowedMoves.includes(lastMove.id) || source.moves.indexOf(lastMove.id) >= 0 || lastMove.isZ) return false;
 			let sketchIndex = source.moves.indexOf('sketch');
 			if (sketchIndex < 0) return false;
-			let move = this.getMove(targetLastMove);
+			let move = this.getMove(lastMove);
 			let sketchedMove = {
 				move: move.name,
 				id: move.id,
@@ -15525,7 +15531,7 @@ let BattleMovedex = {
 					return;
 				}
 				this.add('-activate', target, 'move: Protect');
-				source.moveThisTurnResult = true;
+				move.result = true;
 				let lockedmove = source.getVolatile('lockedmove');
 				if (lockedmove) {
 					// Outrage counter is reset
@@ -15911,11 +15917,11 @@ let BattleMovedex = {
 		priority: 0,
 		flags: {protect: 1, reflectable: 1, mirror: 1, authentic: 1},
 		onHit: function (target) {
-			let targetLastMove = target.getLastMove();
-			if (targetLastMove && !targetLastMove.isZ) {
-				let ppDeducted = target.deductPP(targetLastMove.id, 4);
+			let lastMove = target.getLastMove();
+			if (lastMove && !lastMove.isZ) {
+				let ppDeducted = target.deductPP(lastMove.id, 4);
 				if (ppDeducted) {
-					this.add("-activate", target, 'move: Spite', this.getMove(targetLastMove.id).name, ppDeducted);
+					this.add("-activate", target, 'move: Spite', this.getMove(lastMove.id).name, ppDeducted);
 					return;
 				}
 			}
@@ -17667,9 +17673,9 @@ let BattleMovedex = {
 				this.add('-end', pokemon, 'Torment');
 			},
 			onDisableMove: function (pokemon) {
-				let pokemonLastMove = target.getLastMove();
-				if (pokemonLastMove && pokemonLastMove.id !== 'struggle') {
-					pokemon.disableMove(pokemonLastMove.id);
+				let lastMove = pokemon.getLastMove();
+				if (lastMove && lastMove.id !== 'struggle') {
+					pokemon.disableMove(lastMove.id);
 				}
 			},
 		},
@@ -18135,7 +18141,8 @@ let BattleMovedex = {
 				this.add('-start', target, 'Uproar');
 			},
 			onResidual: function (target) {
-				if (target.getLastMove() && target.getLastMove().id === 'struggle') {
+				let lastMove = target.getLastMove();
+				if (lastMove && lastMove.id === 'struggle') {
 					// don't lock
 					delete target.volatiles['uproar'];
 				}
@@ -18705,7 +18712,7 @@ let BattleMovedex = {
 					return;
 				}
 				this.add('-activate', target, 'move: Wide Guard');
-				source.moveThisTurnResult = true;
+				move.result = true;
 				let lockedmove = source.getVolatile('lockedmove');
 				if (lockedmove) {
 					// Outrage counter is reset

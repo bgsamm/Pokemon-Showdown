@@ -526,6 +526,8 @@ interface ActiveMove extends Effect, MoveData {
 	readonly effectType: 'Move'
 	typeMod: number
 	hit: number
+	result: boolean
+	thisTurn: boolean
 	ability?: Ability
 	aerilateBoosted?: boolean
 	allies?: Pokemon[]

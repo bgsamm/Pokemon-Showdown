@@ -97,7 +97,8 @@ let BattleScripts = {
 
 		this.setActiveMove(move, pokemon, target);
 
-		if (pokemon.moveThisTurn || !this.runEvent('BeforeMove', pokemon, target, move)) {
+		let lastMove = pokemon.getLastMove();
+		if ((lastMove && lastMove.thisTurn) || !this.runEvent('BeforeMove', pokemon, target, move)) {
 			// Prevent invulnerability from persisting until the turn ends.
 			pokemon.removeVolatile('twoturnmove');
 			// Rampage moves end without causing confusion
@@ -120,7 +121,7 @@ let BattleScripts = {
 			pokemon.deductPP(move, null, target);
 			// On gen 1 moves are stored when they are chosen and a PP is deducted.
 			pokemon.side.lastMove = move;
-			pokemon.getLastMove() = move;
+			pokemon.moveHistory.push(move);
 		} else {
 			sourceEffect = move;
 		}

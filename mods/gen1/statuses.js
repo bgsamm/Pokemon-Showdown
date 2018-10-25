@@ -248,7 +248,8 @@ let BattleStatuses = {
 			return duration;
 		},
 		onResidual: function (target) {
-			if (target.getLastMove() && target.getLastMove().id === 'struggle' || target.status === 'slp') {
+			let lastMove = target.getLastMove();
+			if ((lastMove && lastMove.id === 'struggle') || target.status === 'slp') {
 				delete target.volatiles['partialtrappinglock'];
 			}
 		},

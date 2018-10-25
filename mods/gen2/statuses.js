@@ -173,7 +173,8 @@ let BattleStatuses = {
 			return this.random(2, 4);
 		},
 		onResidual: function (target) {
-			if ((target.getLastMove() && target.getLastMove().id === 'struggle') || target.status === 'slp') {
+			let lastMove = target.getLastMove();
+			if ((lastMove && lastMove.id === 'struggle') || target.status === 'slp') {
 				// don't lock, and bypass confusion for calming
 				delete target.volatiles['lockedmove'];
 			}

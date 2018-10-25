@@ -2899,8 +2899,9 @@ let BattleItems = {
 			type: "Fighting",
 		},
 		onUpdate: function (pokemon) {
-			if (!pokemon.hp) return;
-			let moveSlot = pokemon.getLastMove() && pokemon.getMoveData(pokemon.getLastMove().id);
+			let lastMove = pokemon.getLastMove();
+			if (!pokemon.hp || !lastMove) return;
+			let moveSlot = pokemon.getMoveData(lastMove.id);
 			if (moveSlot && moveSlot.pp === 0) {
 				pokemon.addVolatile('leppaberry');
 				pokemon.volatiles['leppaberry'].moveSlot = moveSlot;
@@ -6327,8 +6328,9 @@ let BattleItems = {
 			type: "Fighting",
 		},
 		onUpdate: function (pokemon) {
-			if (!pokemon.hp) return;
-			let moveSlot = pokemon.getLastMove() && pokemon.getMoveData(pokemon.getLastMove().id);
+			let lastMove = pokemon.getLastMove();
+			if (!pokemon.hp || !lastMove) return;
+			let moveSlot = pokemon.getMoveData(lastMove.id);
 			if (moveSlot && moveSlot.pp === 0) {
 				pokemon.addVolatile('leppaberry');
 				pokemon.volatiles['leppaberry'].moveSlot = moveSlot;

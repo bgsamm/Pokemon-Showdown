@@ -78,14 +78,14 @@ let BattleMovedex = {
 			duration: 3,
 			onStart: function (target) {
 				let noEncore = ['encore', 'mimic', 'mirrormove', 'sketch', 'struggle', 'transform'];
-				let targetLastMove = target.getLastMove();
-				let moveIndex = targetLastMove ? target.moves.indexOf(targetLastMove.id) : -1;
-				if (!targetLastMove || noEncore.includes(targetLastMove.id) || !target.moveSlots[moveIndex] || target.moveSlots[moveIndex].pp <= 0) {
+				let lastMove = target.getLastMove();
+				let moveIndex = lastMove ? target.moves.indexOf(lastMove.id) : -1;
+				if (!lastMove || noEncore.includes(lastMove.id) || !target.moveSlots[moveIndex] || target.moveSlots[moveIndex].pp <= 0) {
 					// it failed
 					delete target.volatiles['encore'];
 					return false;
 				}
-				this.effectData.move = targetLastMove.id;
+				this.effectData.move = lastMove.id;
 				this.add('-start', target, 'Encore');
 				if (!this.willMove(target)) {
 					this.effectData.duration++;

@@ -39,9 +39,8 @@ let BattleStatuses = {
 		},
 		onResidual: function (target) {
 			/**@type {Move} */
-			// @ts-ignore
-			let move = target.getLastMove();
-			if (!move.self || (move.self !== true && move.self.volatileStatus !== 'lockedmove')) {
+			let lastMove = target.getLastMove();
+			if (!lastMove.self || (lastMove.self !== true && lastMove.self.volatileStatus !== 'lockedmove')) {
 				// don't lock, and bypass confusion for calming
 				delete target.volatiles['lockedmove'];
 			} else if (target.ability === 'owntempo') {

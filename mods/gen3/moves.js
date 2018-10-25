@@ -256,17 +256,17 @@ let BattleMovedex = {
 				if (!this.willMove(pokemon)) {
 					this.effectData.duration++;
 				}
-				let pokemonLastMove = pokemon.getLastMove();
-				if (!pokemonLastMove) {
+				let lastMove = pokemon.getLastMove();
+				if (!lastMove) {
 					return false;
 				}
 				for (const moveSlot of pokemon.moveSlots) {
-					if (moveSlot.id === pokemonLastMove.id) {
+					if (moveSlot.id === lastMove.id) {
 						if (!moveSlot.pp) {
 							return false;
 						} else {
 							this.add('-start', pokemon, 'Disable', moveSlot.move);
-							this.effectData.move = pokemonLastMove.id;
+							this.effectData.move = lastMove.id;
 							return;
 						}
 					}
@@ -320,15 +320,15 @@ let BattleMovedex = {
 			},
 			onStart: function (target) {
 				let noEncore = ['encore', 'mimic', 'mirrormove', 'sketch', 'struggle', 'transform'];
-				let targetLastMove = target.getLastMove();
-				let moveIndex = targetLastMove ? target.moves.indexOf(targetLastMove.id) : -1;
-				if (!targetLastMove || noEncore.includes(targetLastMove.id) || !target.moveSlots[moveIndex] || target.moveSlots[moveIndex].pp <= 0) {
+				let lastMove = target.getLastMove();
+				let moveIndex = lastMove ? target.moves.indexOf(lastMove.id) : -1;
+				if (!lastMove || noEncore.includes(lastMove.id) || !target.moveSlots[moveIndex] || target.moveSlots[moveIndex].pp <= 0) {
 					// it failed
 					this.add('-fail', target);
 					delete target.volatiles['encore'];
 					return;
 				}
-				this.effectData.move = targetLastMove.id;
+				this.effectData.move = lastMove.id;
 				this.add('-start', target, 'Encore');
 				if (!this.willMove(target)) {
 					this.effectData.duration++;
@@ -752,9 +752,9 @@ let BattleMovedex = {
 		shortDesc: "Lowers the PP of the target's last move by 2-5.",
 		onHit: function (target) {
 			let roll = this.random(2, 6);
-			let targetLastMove = target.getLastMove();
-			if (targetLastMove && target.deductPP(targetLastMove.id, roll)) {
-				this.add("-activate", target, 'move: Spite', targetLastMove.id, roll);
+			let lastMove = target.getLastMove();
+			if (lastMove && target.deductPP(lastMove.id, roll)) {
+				this.add("-activate", target, 'move: Spite', lastMove.id, roll);
 				return;
 			}
 			return false;

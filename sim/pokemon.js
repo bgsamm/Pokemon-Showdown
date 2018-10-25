@@ -92,9 +92,7 @@ class Pokemon {
 		/**@type {?number} */
 		this.draggedIn = null;
 
-		/**@type {string | boolean} */
-		this.moveThisTurn = '';
-		/**@type {Move[]} */
+		/**@type {ActiveMove[]} */
 		this.moveHistory = [];
 
 		/**
@@ -600,13 +598,13 @@ class Pokemon {
 	 * @param {number} [targetLoc]
 	 */
 	moveUsed(move, targetLoc) {
+		move.thisTurn = true;
 		this.moveHistory.push(move);
 		this.lastMoveTargetLoc = targetLoc;
-		this.moveThisTurn = move.id;
 	}
 
 	/**
-	 * @return {Move | null}
+	 * @return {ActiveMove | null}
 	 */
 	getLastMove() {
 		if (this.moveHistory.length === 0) return null;
@@ -629,7 +627,7 @@ class Pokemon {
 		};
 		this.attackedBy.push(lastAttackedBy);
 	}
-	
+
 	/**
 	 * @return {{source: Pokemon, damage: number, thisTurn: boolean, move?: string} | null}
 	 */
@@ -1053,7 +1051,6 @@ class Pokemon {
 			this.forceSwitchFlag = false;
 		}
 
-		this.moveThisTurn = '';
 		this.moveHistory = [];
 
 		this.lastDamage = 0;

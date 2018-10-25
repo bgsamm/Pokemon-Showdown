@@ -2942,7 +2942,7 @@ let BattleMovedex = {
 					return;
 				}
 				this.add('-activate', target, 'move: Protect');
-				source.moveThisTurnResult = true;
+				move.result = true;
 				let lockedmove = source.getVolatile('lockedmove');
 				if (lockedmove) {
 					// Outrage counter is reset
@@ -3023,14 +3023,14 @@ let BattleMovedex = {
 						break;
 					}
 				}
-				let targetLastMove = target.getLastMove();
-				if (!positiveBoost || !targetLastMove) return;
+				let lastMove = target.getLastMove();
+				if (!positiveBoost || !lastMove) return;
 				for (const moveSlot of target.moveSlots) {
-					if (moveSlot.id === targetLastMove.id) {
+					if (moveSlot.id === lastMove.id) {
 						target.deductPP(moveSlot.id, moveSlot.pp);
 					}
 				}
-				this.add('-activate', target, 'move: Literally Cheating', targetLastMove.name, targetLastMove.pp);
+				this.add('-activate', target, 'move: Literally Cheating', lastMove.name, lastMove.pp);
 				this.add('-message', `${target.name} lost PP!`);
 			},
 			onStart: function (battle, source, effect) {

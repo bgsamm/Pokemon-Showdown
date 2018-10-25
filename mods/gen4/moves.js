@@ -380,17 +380,17 @@ let BattleMovedex = {
 				if (!this.willMove(pokemon)) {
 					this.effectData.duration++;
 				}
-				let pokemonLastMove = pokemon.getLastMove();
-				if (!pokemonLastMove) {
+				let lastMove = pokemon.getLastMove();
+				if (!lastMove) {
 					return false;
 				}
 				for (const moveSlot of pokemon.moveSlots) {
-					if (moveSlot.id === pokemonLastMove.id) {
+					if (moveSlot.id === lastMove.id) {
 						if (!moveSlot.pp) {
 							return false;
 						} else {
 							this.add('-start', pokemon, 'Disable', moveSlot.move);
-							this.effectData.move = pokemonLastMove.id;
+							this.effectData.move = lastMove.id;
 							return;
 						}
 					}
@@ -520,15 +520,15 @@ let BattleMovedex = {
 			},
 			onStart: function (target) {
 				let noEncore = ['encore', 'mimic', 'mirrormove', 'sketch', 'struggle', 'transform'];
-				let targetLastMove = target.getLastMove();
-				let moveIndex = targetLastMove ? target.moves.indexOf(targetLastMove.id) : -1;
-				if (!targetLastMove || noEncore.includes(targetLastMove.id) || !target.moveSlots[moveIndex] || target.moveSlots[moveIndex].pp <= 0) {
+				let lastMove = target.getLastMove();
+				let moveIndex = lastMove ? target.moves.indexOf(lastMove.id) : -1;
+				if (!lastMove || noEncore.includes(lastMove.id) || !target.moveSlots[moveIndex] || target.moveSlots[moveIndex].pp <= 0) {
 					// it failed
 					this.add('-fail', target);
 					delete target.volatiles['encore'];
 					return;
 				}
-				this.effectData.move = targetLastMove.id;
+				this.effectData.move = lastMove.id;
 				this.add('-start', target, 'Encore');
 				if (!this.willMove(target)) {
 					this.effectData.duration++;
@@ -1060,11 +1060,11 @@ let BattleMovedex = {
 		desc: "While the user remains active, this move is replaced by the last move used by the target. The copied move has 5 PP. Fails if the target has not made a move, if the user has Transformed, if the user already knows the move, or if the move is Chatter, Metronome, Mimic, Sketch, or Struggle.",
 		onHit: function (target, source) {
 			let disallowedMoves = ['chatter', 'metronome', 'mimic', 'sketch', 'struggle', 'transform'];
-			let targetLastMove = target.getLastMove();
-			if (source.transformed || !targetLastMove || disallowedMoves.includes(targetLastMove.id) || source.moves.indexOf(targetLastMove.id) !== -1 || target.volatiles['substitute']) return false;
+			let lastMove = target.getLastMove();
+			if (source.transformed || !lastMove || disallowedMoves.includes(lastMove.id) || source.moves.indexOf(lastMove.id) !== -1 || target.volatiles['substitute']) return false;
 			let mimicIndex = source.moves.indexOf('mimic');
 			if (mimicIndex < 0) return false;
-			let move = this.getMove(targetLastMove.id);
+			let move = this.getMove(lastMove.id);
 			source.moveSlots[mimicIndex] = {
 				move: move.name,
 				id: move.id,
@@ -1363,11 +1363,11 @@ let BattleMovedex = {
 		inherit: true,
 		onHit: function (target, source) {
 			let disallowedMoves = ['chatter', 'sketch', 'struggle'];
-			let targetLastMove = target.getLastMove();
-			if (source.transformed || !targetLastMove || disallowedMoves.includes(targetLastMove.id) || source.moves.includes(targetLastMove.id) || target.volatiles['substitute']) return false;
+			let lastMove = target.getLastMove();
+			if (source.transformed || !lastMove || disallowedMoves.includes(lastMove.id) || source.moves.includes(lastMove.id) || target.volatiles['substitute']) return false;
 			let sketchIndex = source.moves.indexOf('sketch');
 			if (sketchIndex < 0) return false;
-			let move = this.getMove(targetLastMove.id);
+			let move = this.getMove(lastMove.id);
 			let sketchedMove = {
 				move: move.name,
 				id: move.id,

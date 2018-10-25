@@ -976,11 +976,9 @@ let BattleMovedex = {
 		inherit: true,
 		basePowerCallback: function (pokemon, source) {
 			let lastAttackedBy = pokemon.getLastAttackedBy();
-			if (lastAttackedBy) {
-				if (lastAttackedBy.damage > 0 && lastAttackedBy.thisTurn) {
-					this.debug('Boosted for getting hit by ' + lastAttackedBy.move);
-					return this.isWeather('hail') ? 180 : 120;
-				}
+			if (lastAttackedBy && lastAttackedBy.damage > 0 && lastAttackedBy.thisTurn) {
+				this.debug('Boosted for getting hit by ' + lastAttackedBy.move);
+				return this.isWeather('hail') ? 180 : 120;
 			}
 			return this.isWeather('hail') ? 90 : 60;
 		},

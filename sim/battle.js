@@ -1357,7 +1357,7 @@ class Battle extends Dex.ModdedDex {
 		if (side.active[pos]) {
 			let oldActive = side.active[pos];
 			if (this.gen === 4 && sourceEffect) {
-				newMove = oldActive.getLastMove();
+				newMove = oldActive.getLastMove;
 			}
 			if (this.cancelMove(oldActive)) {
 				for (const foeActive of side.foe.active) {
@@ -1533,11 +1533,8 @@ class Battle extends Dex.ModdedDex {
 		for (const side of this.sides) {
 			for (const pokemon of side.active) {
 				if (!pokemon) continue;
-				pokemon.moveThisTurn = '';
 				pokemon.usedItemThisTurn = false;
 				pokemon.newlySwitched = false;
-				pokemon.moveLastTurnResult = pokemon.moveThisTurnResult;
-				pokemon.moveThisTurnResult = undefined;
 				pokemon.hurtThisTurn = false;
 
 				pokemon.maybeDisabled = false;
@@ -1550,6 +1547,10 @@ class Battle extends Dex.ModdedDex {
 
 				// If it was an illusion, it's not any more
 				if (pokemon.getLastAttackedBy() && this.gen >= 7) pokemon.knownType = true;
+
+				for (let move of pokemon.moveHistory) {
+					move.thisTurn = false;
+				}
 
 				for (let i = pokemon.attackedBy.length - 1; i >= 0; i--) {
 					let attack = pokemon.attackedBy[i];

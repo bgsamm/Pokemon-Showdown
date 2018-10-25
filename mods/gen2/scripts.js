@@ -79,14 +79,6 @@ let BattleScripts = {
 
 		this.setActiveMove(move, pokemon, target);
 
-		if (pokemon.moveThisTurn) {
-			// THIS IS PURELY A SANITY CHECK
-			// DO NOT TAKE ADVANTAGE OF THIS TO PREVENT A POKEMON FROM MOVING;
-			// USE this.cancelMove INSTEAD
-			this.debug('' + pokemon.id + ' INCONSISTENT STATE, ALREADY MOVED: ' + pokemon.moveThisTurn);
-			this.clearActiveMove(true);
-			return;
-		}
 		if (!this.runEvent('BeforeMove', pokemon, target, move)) {
 			this.runEvent('MoveAborted', pokemon, target, move);
 			this.clearActiveMove(true);
