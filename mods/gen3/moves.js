@@ -256,16 +256,17 @@ let BattleMovedex = {
 				if (!this.willMove(pokemon)) {
 					this.effectData.duration++;
 				}
-				if (!pokemon.lastMove) {
+				let pokemonLastMove = pokemon.getLastMove();
+				if (!pokemonLastMove) {
 					return false;
 				}
 				for (const moveSlot of pokemon.moveSlots) {
-					if (moveSlot.id === pokemon.lastMove.id) {
+					if (moveSlot.id === pokemonLastMove.id) {
 						if (!moveSlot.pp) {
 							return false;
 						} else {
 							this.add('-start', pokemon, 'Disable', moveSlot.move);
-							this.effectData.move = pokemon.lastMove.id;
+							this.effectData.move = pokemonLastMove.id;
 							return;
 						}
 					}
@@ -319,14 +320,15 @@ let BattleMovedex = {
 			},
 			onStart: function (target) {
 				let noEncore = ['encore', 'mimic', 'mirrormove', 'sketch', 'struggle', 'transform'];
-				let moveIndex = target.lastMove ? target.moves.indexOf(target.lastMove.id) : -1;
-				if (!target.lastMove || noEncore.includes(target.lastMove.id) || !target.moveSlots[moveIndex] || target.moveSlots[moveIndex].pp <= 0) {
+				let targetLastMove = target.getLastMove();
+				let moveIndex = targetLastMove ? target.moves.indexOf(targetLastMove.id) : -1;
+				if (!targetLastMove || noEncore.includes(targetLastMove.id) || !target.moveSlots[moveIndex] || target.moveSlots[moveIndex].pp <= 0) {
 					// it failed
 					this.add('-fail', target);
 					delete target.volatiles['encore'];
 					return;
 				}
-				this.effectData.move = target.lastMove.id;
+				this.effectData.move = targetLastMove.id;
 				this.add('-start', target, 'Encore');
 				if (!this.willMove(target)) {
 					this.effectData.duration++;
@@ -559,7 +561,7 @@ let BattleMovedex = {
 		onHit: function (pokemon) {
 			let noMirror = ['assist', 'curse', 'doomdesire', 'focuspunch', 'futuresight', 'magiccoat', 'metronome', 'mimic', 'mirrormove', 'naturepower', 'psychup', 'roleplay', 'sketch', 'sleeptalk', 'spikes', 'spitup', 'taunt', 'teeterdance', 'transform'];
 			let lastAttackedBy = pokemon.getLastAttackedBy();
-			if (!lastAttackedBy || !lastAttackedBy.source.lastMove || !lastAttackedBy.move || noMirror.includes(lastAttackedBy.move) || !lastAttackedBy.source.hasMove(lastAttackedBy.move)) {
+			if (!lastAttackedBy || !lastAttackedBy.source.getLastMove() || !lastAttackedBy.move || noMirror.includes(lastAttackedBy.move) || !lastAttackedBy.source.hasMove(lastAttackedBy.move)) {
 				return false;
 			}
 			this.useMove(lastAttackedBy.move, pokemon);
@@ -750,8 +752,9 @@ let BattleMovedex = {
 		shortDesc: "Lowers the PP of the target's last move by 2-5.",
 		onHit: function (target) {
 			let roll = this.random(2, 6);
-			if (target.lastMove && target.deductPP(target.lastMove.id, roll)) {
-				this.add("-activate", target, 'move: Spite', target.lastMove.id, roll);
+			let targetLastMove = target.getLastMove();
+			if (targetLastMove && target.deductPP(targetLastMove.id, roll)) {
+				this.add("-activate", target, 'move: Spite', targetLastMove.id, roll);
 				return;
 			}
 			return false;

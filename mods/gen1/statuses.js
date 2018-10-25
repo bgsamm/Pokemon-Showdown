@@ -81,7 +81,7 @@ let BattleStatuses = {
 			if (pokemon.statusData.time > 0) {
 				this.add('cant', pokemon, 'slp');
 			}
-			pokemon.lastMove = null;
+			pokemon.moveHistory = [];
 			return false;
 		},
 		onAfterMoveSelf: function (pokemon) {
@@ -99,7 +99,7 @@ let BattleStatuses = {
 		onBeforeMovePriority: 10,
 		onBeforeMove: function (pokemon, target, move) {
 			this.add('cant', pokemon, 'frz');
-			pokemon.lastMove = null;
+			pokemon.moveHistory = [];
 			return false;
 		},
 		onAfterMoveSecondary: function (target, source, move) {
@@ -248,7 +248,7 @@ let BattleStatuses = {
 			return duration;
 		},
 		onResidual: function (target) {
-			if (target.lastMove && target.lastMove.id === 'struggle' || target.status === 'slp') {
+			if (target.getLastMove() && target.getLastMove().id === 'struggle' || target.status === 'slp') {
 				delete target.volatiles['partialtrappinglock'];
 			}
 		},

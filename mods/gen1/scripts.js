@@ -120,7 +120,7 @@ let BattleScripts = {
 			pokemon.deductPP(move, null, target);
 			// On gen 1 moves are stored when they are chosen and a PP is deducted.
 			pokemon.side.lastMove = move;
-			pokemon.lastMove = move;
+			pokemon.getLastMove() = move;
 		} else {
 			sourceEffect = move;
 		}

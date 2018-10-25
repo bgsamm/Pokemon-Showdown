@@ -3023,13 +3023,14 @@ let BattleMovedex = {
 						break;
 					}
 				}
-				if (!positiveBoost || !target.lastMove) return;
+				let targetLastMove = target.getLastMove();
+				if (!positiveBoost || !targetLastMove) return;
 				for (const moveSlot of target.moveSlots) {
-					if (moveSlot.id === target.lastMove.id) {
+					if (moveSlot.id === targetLastMove.id) {
 						target.deductPP(moveSlot.id, moveSlot.pp);
 					}
 				}
-				this.add('-activate', target, 'move: Literally Cheating', target.lastMove.name, target.lastMove.pp);
+				this.add('-activate', target, 'move: Literally Cheating', targetLastMove.name, targetLastMove.pp);
 				this.add('-message', `${target.name} lost PP!`);
 			},
 			onStart: function (battle, source, effect) {

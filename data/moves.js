@@ -2557,11 +2557,11 @@ let BattleMovedex = {
 		priority: 0,
 		flags: {authentic: 1},
 		onHit: function (target, source) {
-			if (!target.lastMove) {
+			if (!target.getLastMove()) {
 				return false;
 			}
 			let possibleTypes = [];
-			let attackType = target.lastMove.type;
+			let attackType = target.getLastMove().type;
 			for (let type in this.data.TypeChart) {
 				if (source.hasType(type)) continue;
 				let typeCheck = this.data.TypeChart[type].damageTaken[attackType];
@@ -3391,7 +3391,7 @@ let BattleMovedex = {
 		flags: {protect: 1, reflectable: 1, mirror: 1, authentic: 1},
 		volatileStatus: 'disable',
 		onTryHit: function (target) {
-			if (!target.lastMove || target.lastMove.isZ) {
+			if (!target.getLastMove() || target.getLastMove().isZ) {
 				return false;
 			}
 		},
@@ -3402,12 +3402,13 @@ let BattleMovedex = {
 				if (!this.willMove(pokemon)) {
 					this.effectData.duration++;
 				}
-				if (!pokemon.lastMove) {
+				let pokemonLastMove = pokemon.getLastMove();
+				if (!pokemonLastMove) {
 					this.debug('pokemon hasn\'t moved yet');
 					return false;
 				}
 				for (const moveSlot of pokemon.moveSlots) {
-					if (moveSlot.id === pokemon.lastMove.id) {
+					if (moveSlot.id === pokemonLastMove.id) {
 						if (!moveSlot.pp) {
 							this.debug('Move out of PP');
 							return false;
@@ -3417,7 +3418,7 @@ let BattleMovedex = {
 							} else {
 								this.add('-start', pokemon, 'Disable', moveSlot.move);
 							}
-							this.effectData.move = pokemon.lastMove.id;
+							this.effectData.move = pokemonLastMove.id;
 							return;
 						}
 					}
@@ -4394,13 +4395,14 @@ let BattleMovedex = {
 			noCopy: true, // doesn't get copied by Z-Baton Pass
 			onStart: function (target) {
 				let noEncore = ['assist', 'copycat', 'encore', 'mefirst', 'metronome', 'mimic', 'mirrormove', 'naturepower', 'sketch', 'sleeptalk', 'struggle', 'transform'];
-				let moveIndex = target.lastMove ? target.moves.indexOf(target.lastMove.id) : -1;
-				if (!target.lastMove || target.lastMove.isZ || noEncore.includes(target.lastMove.id) || !target.moveSlots[moveIndex] || target.moveSlots[moveIndex].pp <= 0) {
+				let targetLastMove = target.getLastMove();
+				let moveIndex = targetLastMove ? target.moves.indexOf(targetLastMove.id) : -1;
+				if (!targetLastMove || targetLastMove.isZ || noEncore.includes(targetLastMove.id) || !target.moveSlots[moveIndex] || target.moveSlots[moveIndex].pp <= 0) {
 					// it failed
 					delete target.volatiles['encore'];
 					return false;
 				}
-				this.effectData.move = target.lastMove.id;
+				this.effectData.move = targetLastMove.id;
 				this.add('-start', target, 'Encore');
 				if (!this.willMove(target)) {
 					this.effectData.duration++;
@@ -6725,11 +6727,12 @@ let BattleMovedex = {
 			},
 			onFaint: function (target, source, effect) {
 				if (!source || source.fainted || !effect) return;
-				if (effect.effectType === 'Move' && !effect.isFutureMove && source.lastMove) {
+				let sourceLastMove = pokemon.getLastMove();
+				if (effect.effectType === 'Move' && !effect.isFutureMove && sourceLastMove) {
 					for (const moveSlot of source.moveSlots) {
-						if (moveSlot.id === source.lastMove.id) {
+						if (moveSlot.id === sourceLastMove.id) {
 							moveSlot.pp = 0;
-							this.add('-activate', source, 'move: Grudge', this.getMove(source.lastMove.id).name);
+							this.add('-activate', source, 'move: Grudge', this.getMove(sourceLastMove.id).name);
 						}
 					}
 				}
@@ -8213,7 +8216,7 @@ let BattleMovedex = {
 				}
 			},
 			onResidual: function (target) {
-				if (target.lastMove && target.lastMove.id === 'struggle') {
+				if (target.getLastMove() && target.getLastMove().id === 'struggle') {
 					// don't lock
 					delete target.volatiles['iceball'];
 				}
@@ -8608,17 +8611,17 @@ let BattleMovedex = {
 		priority: 0,
 		flags: {protect: 1, authentic: 1, mystery: 1},
 		onHit: function (target, source) {
-			if (!target.lastMove) return false;
-			let lastMove = target.lastMove;
-			let moveIndex = target.moves.indexOf(lastMove.id);
+			let targetLastMove = target.getLastMove();
+			if (!targetLastMove) return false;
+			let moveIndex = target.moves.indexOf(targetLastMove.id);
 			let noInstruct = [
 				'assist', 'beakblast', 'bide', 'copycat', 'focuspunch', 'iceball', 'instruct', 'mefirst', 'metronome', 'mimic', 'mirrormove', 'naturepower', 'outrage', 'petaldance', 'rollout', 'shelltrap', 'sketch', 'sleeptalk', 'thrash', 'transform',
 			];
-			if (noInstruct.includes(lastMove.id) || lastMove.isZ || lastMove.flags['charge'] || lastMove.flags['recharge'] || target.volatiles['beakblast'] || target.volatiles['focuspunch'] || target.volatiles['shelltrap'] || (target.moveSlots[moveIndex] && target.moveSlots[moveIndex].pp <= 0)) {
+			if (noInstruct.includes(targetLastMove.id) || targetLastMove.isZ || targetLastMove.flags['charge'] || targetLastMove.flags['recharge'] || target.volatiles['beakblast'] || target.volatiles['focuspunch'] || target.volatiles['shelltrap'] || (target.moveSlots[moveIndex] && target.moveSlots[moveIndex].pp <= 0)) {
 				return false;
 			}
 			this.add('-singleturn', target, 'move: Instruct', '[of] ' + source);
-			this.runMove(target.lastMove.id, target, target.lastMoveTargetLoc);
+			this.runMove(targetLastMove.id, target, target.lastMoveTargetLoc);
 		},
 		secondary: null,
 		target: "normal",
@@ -10307,10 +10310,11 @@ let BattleMovedex = {
 		flags: {protect: 1, authentic: 1, mystery: 1},
 		onHit: function (target, source) {
 			let disallowedMoves = ['chatter', 'mimic', 'sketch', 'struggle', 'transform'];
-			if (source.transformed || !target.lastMove || disallowedMoves.includes(target.lastMove.id) || source.moves.indexOf(target.lastMove.id) >= 0 || target.lastMove.isZ) return false;
+			let targetLastMove = target.getLastMove();
+			if (source.transformed || !targetLastMove || disallowedMoves.includes(targetLastMove.id) || source.moves.indexOf(targetLastMove.id) >= 0 || targetLastMove.isZ) return false;
 			let mimicIndex = source.moves.indexOf('mimic');
 			if (mimicIndex < 0) return false;
-			let move = this.getMove(target.lastMove.id);
+			let move = this.getMove(targetLastMove.id);
 			source.moveSlots[mimicIndex] = {
 				move: move.name,
 				id: move.id,
@@ -10512,10 +10516,11 @@ let BattleMovedex = {
 		priority: 0,
 		flags: {},
 		onTryHit: function (target, pokemon) {
-			if (!target.lastMove || !target.lastMove.flags['mirror'] || target.lastMove.isZ) {
+			let targetLastMove = target.getLastMove();
+			if (!targetLastMove || !targetLastMove.flags['mirror'] || targetLastMove.isZ) {
 				return false;
 			}
-			this.useMove(target.lastMove.id, pokemon, target);
+			this.useMove(targetLastMove.id, pokemon, target);
 			return null;
 		},
 		secondary: null,
@@ -13740,7 +13745,7 @@ let BattleMovedex = {
 				}
 			},
 			onResidual: function (target) {
-				if (target.lastMove && target.lastMove.id === 'struggle') {
+				if (target.getLastMove() && target.getLastMove().id === 'struggle') {
 					// don't lock
 					delete target.volatiles['rollout'];
 				}
@@ -14776,10 +14781,11 @@ let BattleMovedex = {
 		flags: {authentic: 1, mystery: 1},
 		onHit: function (target, source) {
 			let disallowedMoves = ['chatter', 'sketch', 'struggle'];
-			if (source.transformed || !target.lastMove || disallowedMoves.includes(target.lastMove.id) || source.moves.indexOf(target.lastMove.id) >= 0 || target.lastMove.isZ) return false;
+			let targetLastMove = target.getLastMove();
+			if (source.transformed || !targetLastMove || disallowedMoves.includes(targetLastMove.id) || source.moves.indexOf(targetLastMove.id) >= 0 || targetLastMove.isZ) return false;
 			let sketchIndex = source.moves.indexOf('sketch');
 			if (sketchIndex < 0) return false;
-			let move = this.getMove(target.lastMove);
+			let move = this.getMove(targetLastMove);
 			let sketchedMove = {
 				move: move.name,
 				id: move.id,
@@ -15905,10 +15911,11 @@ let BattleMovedex = {
 		priority: 0,
 		flags: {protect: 1, reflectable: 1, mirror: 1, authentic: 1},
 		onHit: function (target) {
-			if (target.lastMove && !target.lastMove.isZ) {
-				let ppDeducted = target.deductPP(target.lastMove.id, 4);
+			let targetLastMove = target.getLastMove();
+			if (targetLastMove && !targetLastMove.isZ) {
+				let ppDeducted = target.deductPP(targetLastMove.id, 4);
 				if (ppDeducted) {
-					this.add("-activate", target, 'move: Spite', this.getMove(target.lastMove.id).name, ppDeducted);
+					this.add("-activate", target, 'move: Spite', this.getMove(targetLastMove.id).name, ppDeducted);
 					return;
 				}
 			}
@@ -17660,7 +17667,10 @@ let BattleMovedex = {
 				this.add('-end', pokemon, 'Torment');
 			},
 			onDisableMove: function (pokemon) {
-				if (pokemon.lastMove && pokemon.lastMove.id !== 'struggle') pokemon.disableMove(pokemon.lastMove.id);
+				let pokemonLastMove = target.getLastMove();
+				if (pokemonLastMove && pokemonLastMove.id !== 'struggle') {
+					pokemon.disableMove(pokemonLastMove.id);
+				}
 			},
 		},
 		secondary: null,
@@ -18125,7 +18135,7 @@ let BattleMovedex = {
 				this.add('-start', target, 'Uproar');
 			},
 			onResidual: function (target) {
-				if (target.lastMove && target.lastMove.id === 'struggle') {
+				if (target.getLastMove() && target.getLastMove().id === 'struggle') {
 					// don't lock
 					delete target.volatiles['uproar'];
 				}

@@ -1357,7 +1357,7 @@ class Battle extends Dex.ModdedDex {
 		if (side.active[pos]) {
 			let oldActive = side.active[pos];
 			if (this.gen === 4 && sourceEffect) {
-				newMove = oldActive.lastMove;
+				newMove = oldActive.getLastMove();
 			}
 			if (this.cancelMove(oldActive)) {
 				for (const foeActive of side.foe.active) {
@@ -1373,7 +1373,7 @@ class Battle extends Dex.ModdedDex {
 				pokemon.copyVolatileFrom(oldActive);
 			}
 		}
-		if (newMove) pokemon.lastMove = newMove;
+		if (newMove) pokemon.moveHistory.push(newMove);
 		pokemon.isActive = true;
 		this.runEvent('BeforeSwitchIn', pokemon);
 		if (side.active[pos]) {

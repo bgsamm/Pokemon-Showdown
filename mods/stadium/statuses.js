@@ -57,7 +57,7 @@ let BattleStatuses = {
 		onBeforeMove: function (pokemon, target, move) {
 			pokemon.statusData.time--;
 			this.add('cant', pokemon, 'slp');
-			pokemon.lastMove = null;
+			pokemon.moveHistory = [];
 			return false;
 		},
 		onAfterMoveSelf: function (pokemon) {
@@ -75,7 +75,7 @@ let BattleStatuses = {
 		onBeforeMovePriority: 2,
 		onBeforeMove: function (pokemon, target, move) {
 			this.add('cant', pokemon, 'frz');
-			pokemon.lastMove = null;
+			pokemon.moveHistory = [];
 			return false;
 		},
 		onHit: function (target, source, move) {

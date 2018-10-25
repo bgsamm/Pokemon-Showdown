@@ -380,16 +380,17 @@ let BattleMovedex = {
 				if (!this.willMove(pokemon)) {
 					this.effectData.duration++;
 				}
-				if (!pokemon.lastMove) {
+				let pokemonLastMove = pokemon.getLastMove();
+				if (!pokemonLastMove) {
 					return false;
 				}
 				for (const moveSlot of pokemon.moveSlots) {
-					if (moveSlot.id === pokemon.lastMove.id) {
+					if (moveSlot.id === pokemonLastMove.id) {
 						if (!moveSlot.pp) {
 							return false;
 						} else {
 							this.add('-start', pokemon, 'Disable', moveSlot.move);
-							this.effectData.move = pokemon.lastMove.id;
+							this.effectData.move = pokemonLastMove.id;
 							return;
 						}
 					}
@@ -519,14 +520,15 @@ let BattleMovedex = {
 			},
 			onStart: function (target) {
 				let noEncore = ['encore', 'mimic', 'mirrormove', 'sketch', 'struggle', 'transform'];
-				let moveIndex = target.lastMove ? target.moves.indexOf(target.lastMove.id) : -1;
-				if (!target.lastMove || noEncore.includes(target.lastMove.id) || !target.moveSlots[moveIndex] || target.moveSlots[moveIndex].pp <= 0) {
+				let targetLastMove = target.getLastMove();
+				let moveIndex = targetLastMove ? target.moves.indexOf(targetLastMove.id) : -1;
+				if (!targetLastMove || noEncore.includes(targetLastMove.id) || !target.moveSlots[moveIndex] || target.moveSlots[moveIndex].pp <= 0) {
 					// it failed
 					this.add('-fail', target);
 					delete target.volatiles['encore'];
 					return;
 				}
-				this.effectData.move = target.lastMove.id;
+				this.effectData.move = targetLastMove.id;
 				this.add('-start', target, 'Encore');
 				if (!this.willMove(target)) {
 					this.effectData.duration++;
@@ -827,7 +829,7 @@ let BattleMovedex = {
 					target.setStatus('');
 					this.add('-heal', target, target.getHealth, '[from] move: Healing Wish');
 					target.side.removeSideCondition('healingwish');
-					target.lastMove = this.lastMove;
+					target.moveHistory.push(this.lastMove);
 				} else {
 					target.switchFlag = true;
 				}
@@ -962,7 +964,7 @@ let BattleMovedex = {
 					}
 					this.add('-heal', target, target.getHealth, '[from] move: Lunar Dance');
 					target.side.removeSideCondition('lunardance');
-					target.lastMove = this.lastMove;
+					target.moveHistory.push(this.lastMove);
 				} else {
 					target.switchFlag = true;
 				}
@@ -1058,10 +1060,11 @@ let BattleMovedex = {
 		desc: "While the user remains active, this move is replaced by the last move used by the target. The copied move has 5 PP. Fails if the target has not made a move, if the user has Transformed, if the user already knows the move, or if the move is Chatter, Metronome, Mimic, Sketch, or Struggle.",
 		onHit: function (target, source) {
 			let disallowedMoves = ['chatter', 'metronome', 'mimic', 'sketch', 'struggle', 'transform'];
-			if (source.transformed || !target.lastMove || disallowedMoves.includes(target.lastMove.id) || source.moves.indexOf(target.lastMove.id) !== -1 || target.volatiles['substitute']) return false;
+			let targetLastMove = target.getLastMove();
+			if (source.transformed || !targetLastMove || disallowedMoves.includes(targetLastMove.id) || source.moves.indexOf(targetLastMove.id) !== -1 || target.volatiles['substitute']) return false;
 			let mimicIndex = source.moves.indexOf('mimic');
 			if (mimicIndex < 0) return false;
-			let move = this.getMove(target.lastMove.id);
+			let move = this.getMove(targetLastMove.id);
 			source.moveSlots[mimicIndex] = {
 				move: move.name,
 				id: move.id,
@@ -1102,7 +1105,7 @@ let BattleMovedex = {
 		onHit: function (pokemon) {
 			let noMirror = ['acupressure', 'aromatherapy', 'assist', 'chatter', 'copycat', 'counter', 'curse', 'doomdesire', 'feint', 'focuspunch', 'futuresight', 'gravity', 'hail', 'haze', 'healbell', 'helpinghand', 'lightscreen', 'luckychant', 'magiccoat', 'mefirst', 'metronome', 'mimic', 'mirrorcoat', 'mirrormove', 'mist', 'mudsport', 'naturepower', 'perishsong', 'psychup', 'raindance', 'reflect', 'roleplay', 'safeguard', 'sandstorm', 'sketch', 'sleeptalk', 'snatch', 'spikes', 'spitup', 'stealthrock', 'struggle', 'sunnyday', 'tailwind', 'toxicspikes', 'transform', 'watersport'];
 			let lastAttackedBy = pokemon.getLastAttackedBy();
-			if (!lastAttackedBy || !lastAttackedBy.source.lastMove || !lastAttackedBy.move || noMirror.includes(lastAttackedBy.move) || !lastAttackedBy.source.hasMove(lastAttackedBy.move)) {
+			if (!lastAttackedBy || !lastAttackedBy.source.getLastMove() || !lastAttackedBy.move || noMirror.includes(lastAttackedBy.move) || !lastAttackedBy.source.hasMove(lastAttackedBy.move)) {
 				 return false;
 			}
 			this.useMove(lastAttackedBy.move, pokemon);
@@ -1360,10 +1363,11 @@ let BattleMovedex = {
 		inherit: true,
 		onHit: function (target, source) {
 			let disallowedMoves = ['chatter', 'sketch', 'struggle'];
-			if (source.transformed || !target.lastMove || disallowedMoves.includes(target.lastMove.id) || source.moves.includes(target.lastMove.id) || target.volatiles['substitute']) return false;
+			let targetLastMove = target.getLastMove();
+			if (source.transformed || !targetLastMove || disallowedMoves.includes(targetLastMove.id) || source.moves.includes(targetLastMove.id) || target.volatiles['substitute']) return false;
 			let sketchIndex = source.moves.indexOf('sketch');
 			if (sketchIndex < 0) return false;
-			let move = this.getMove(target.lastMove.id);
+			let move = this.getMove(targetLastMove.id);
 			let sketchedMove = {
 				move: move.name,
 				id: move.id,

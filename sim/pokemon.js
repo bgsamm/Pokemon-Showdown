@@ -92,10 +92,10 @@ class Pokemon {
 		/**@type {?number} */
 		this.draggedIn = null;
 
-		/**@type {?Move} */
-		this.lastMove = null;
 		/**@type {string | boolean} */
 		this.moveThisTurn = '';
+		/**@type {Move[]} */
+		this.moveHistory = [];
 
 		/**
 		 * The result of the last move used on the previous turn by this
@@ -600,9 +600,17 @@ class Pokemon {
 	 * @param {number} [targetLoc]
 	 */
 	moveUsed(move, targetLoc) {
-		this.lastMove = move;
+		this.moveHistory.push(move);
 		this.lastMoveTargetLoc = targetLoc;
 		this.moveThisTurn = move.id;
+	}
+
+	/**
+	 * @return {Move | null}
+	 */
+	getLastMove() {
+		if (this.moveHistory.length === 0) return null;
+		return this.moveHistory[this.moveHistory.length - 1];
 	}
 
 	/**
@@ -621,9 +629,12 @@ class Pokemon {
 		};
 		this.attackedBy.push(lastAttackedBy);
 	}
-
+	
+	/**
+	 * @return {{source: Pokemon, damage: number, thisTurn: boolean, move?: string} | null}
+	 */
 	getLastAttackedBy() {
-		if (this.attackedBy.length === 0) return undefined;
+		if (this.attackedBy.length === 0) return null;
 		return this.attackedBy[this.attackedBy.length - 1];
 	}
 
@@ -1042,8 +1053,8 @@ class Pokemon {
 			this.forceSwitchFlag = false;
 		}
 
-		this.lastMove = null;
 		this.moveThisTurn = '';
+		this.moveHistory = [];
 
 		this.lastDamage = 0;
 		this.attackedBy = [];

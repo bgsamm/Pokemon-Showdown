@@ -145,7 +145,7 @@ let BattleMovedex = {
 		desc: "Deals damage to the opposing Pokemon equal to twice the HP lost by the user from a physical attack this turn. This move considers Hidden Power as Normal type, and only the last hit of a multi-hit attack is counted. Fails if the user moves first, if the user was not hit by a physical attack this turn, or if the user did not lose HP from the attack. If the opposing Pokemon used Fissure or Horn Drill and missed, this move deals 65535 damage.",
 		damageCallback: function (pokemon, target) {
 			let lastAttackedBy = pokemon.getLastAttackedBy();
-			if (lastAttackedBy && lastAttackedBy.move && lastAttackedBy.thisTurn && (this.getCategory(lastAttackedBy.move) === 'Physical' || this.getMove(lastAttackedBy.move).id === 'hiddenpower') && (!target.lastMove || target.lastMove.id !== 'sleeptalk')) {
+			if (lastAttackedBy && lastAttackedBy.move && lastAttackedBy.thisTurn && (this.getCategory(lastAttackedBy.move) === 'Physical' || this.getMove(lastAttackedBy.move).id === 'hiddenpower') && (!target.getLastMove() || target.getLastMove().id !== 'sleeptalk')) {
 				return 2 * lastAttackedBy.damage;
 			}
 			return false;
@@ -241,14 +241,15 @@ let BattleMovedex = {
 			},
 			onStart: function (target) {
 				let noEncore = ['encore', 'metronome', 'mimic', 'mirrormove', 'sketch', 'sleeptalk', 'struggle', 'transform'];
-				let moveIndex = target.lastMove ? target.moves.indexOf(target.lastMove.id) : -1;
-				if (!target.lastMove || noEncore.includes(target.lastMove.id) || !target.moveSlots[moveIndex] || target.moveSlots[moveIndex].pp <= 0) {
+				let targetLastMove = target.getLastMove();
+				let moveIndex = targetLastMove ? target.moves.indexOf(targetLastMove.id) : -1;
+				if (!targetLastMove || noEncore.includes(targetLastMove.id) || !target.moveSlots[moveIndex] || target.moveSlots[moveIndex].pp <= 0) {
 					// it failed
 					this.add('-fail', target);
 					delete target.volatiles['encore'];
 					return;
 				}
-				this.effectData.move = target.lastMove.id;
+				this.effectData.move = targetLastMove.id;
 				this.add('-start', target, 'Encore');
 				if (!this.willMove(target)) {
 					this.effectData.duration++;
@@ -494,7 +495,7 @@ let BattleMovedex = {
 		desc: "Deals damage to the opposing Pokemon equal to twice the HP lost by the user from a special attack this turn. This move considers Hidden Power as Normal type, and only the last hit of a multi-hit attack is counted. Fails if the user moves first, if the user was not hit by a special attack this turn, or if the user did not lose HP from the attack.",
 		damageCallback: function (pokemon, target) {
 			let lastAttackedBy = pokemon.getLastAttackedBy();
-			if (lastAttackedBy && lastAttackedBy.move && lastAttackedBy.thisTurn && this.getCategory(lastAttackedBy.move) === 'Special' && this.getMove(lastAttackedBy.move).id !== 'hiddenpower' && (!target.lastMove || target.lastMove.id !== 'sleeptalk')) {
+			if (lastAttackedBy && lastAttackedBy.move && lastAttackedBy.thisTurn && this.getCategory(lastAttackedBy.move) === 'Special' && this.getMove(lastAttackedBy.move).id !== 'hiddenpower' && (!target.getLastMove() || target.getLastMove().id !== 'sleeptalk')) {
 				return 2 * lastAttackedBy.damage;
 			}
 			return false;
@@ -510,11 +511,11 @@ let BattleMovedex = {
 		onHit: function (pokemon) {
 			let noMirror = ['metronome', 'mimic', 'mirrormove', 'sketch', 'sleeptalk', 'transform'];
 			const target = pokemon.side.foe.active[0];
-			const lastMove = target && target.lastMove && target.lastMove.id;
-			if (!lastMove || (!pokemon.activeTurns && !target.moveThisTurn) || noMirror.includes(lastMove) || pokemon.moves.includes(lastMove)) {
+			const targetLastMove = target && target.getLastMove() && target.getLastMove().id;
+			if (!targetLastMove || (!pokemon.activeTurns && !target.moveThisTurn) || noMirror.includes(targetLastMove) || pokemon.moves.includes(targetLastMove)) {
 				return false;
 			}
-			this.useMove(lastMove, pokemon);
+			this.useMove(targetLastMove, pokemon);
 		},
 		noSketch: true,
 	},

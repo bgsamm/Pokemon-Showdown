@@ -40,7 +40,7 @@ let BattleStatuses = {
 		onResidual: function (target) {
 			/**@type {Move} */
 			// @ts-ignore
-			let move = target.lastMove;
+			let move = target.getLastMove();
 			if (!move.self || (move.self !== true && move.self.volatileStatus !== 'lockedmove')) {
 				// don't lock, and bypass confusion for calming
 				delete target.volatiles['lockedmove'];
@@ -54,7 +54,7 @@ let BattleStatuses = {
 		},
 		onLockMove: function (pokemon) {
 			// @ts-ignore
-			return pokemon.lastMove.id;
+			return pokemon.getLastMove().id;
 		},
 	},
 	confusion: {

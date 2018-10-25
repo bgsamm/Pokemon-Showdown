@@ -640,10 +640,10 @@ let BattleMovedex = {
 		desc: "The user uses the last move used by the target. Fails if the target has not made a move, or if the last move used was Mirror Move.",
 		onHit: function (pokemon) {
 			let foe = pokemon.side.foe.active[0];
-			if (!foe || !foe.lastMove || foe.lastMove.id === 'mirrormove') {
+			if (!foe || !foe.getLastMove() || foe.getLastMove().id === 'mirrormove') {
 				return false;
 			}
-			this.useMove(foe.lastMove.id, pokemon);
+			this.useMove(foe.getLastMove().id, pokemon);
 		},
 	},
 	mist: {
